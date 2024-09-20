@@ -3,14 +3,15 @@ import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { wd, hp } from '../helpers/comment'
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown,useReducedMotion } from 'react-native-reanimated';
 import { theme } from '../constants/theme';
 import { useRouter } from 'expo-router';
 const WellcomeScreen = () => {
     const router = useRouter()
+    
     return (
+        
         <View style={styles.container}>
-
             <StatusBar style="light" />
 
             <Image
@@ -18,7 +19,7 @@ const WellcomeScreen = () => {
                 style={styles.bgImage}
                 resizeMode='cover'
             />
-
+             
             <Animated.View
                 entering={FadeInDown.duration(600)}
                 style={{ flex: 1 }}>

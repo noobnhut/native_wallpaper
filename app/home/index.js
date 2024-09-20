@@ -1,35 +1,47 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Pressable,
-  ScrollView,
-  TextInput,
-} from "react-native";
-import { StatusBar } from "expo-status-bar";
 import { wd, hp } from "../../helpers/comment";
-import { LinearGradient } from "expo-linear-gradient";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { theme } from "../../constants/theme";
+import { apiCall } from "../../api";
+
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  View,Text,StyleSheet,
+  Pressable,ScrollView,TextInput,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { debounce } from "lodash";
 import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
+
 import Categories from "../../components/categories";
-import { apiCall } from "../../api";
 import Images from "../../components/images";
+
+var page = 1;
 
 const HomeScreen = () => {
   const router = useRouter();
+  
   const [search, setSearch] = useState("");
   const searchInputRef = useRef(null);
   const [activeCategory, setActiveCategory] = useState(null);
   const [images,setImage]=useState([])
+
   const handleChangeCategory = (cat) => {
     setActiveCategory(cat);
+    clearSearch()
+    setImage([])
+    page = 1;
+    let params = {
+      page,
+    }
+    if(cat)params.category = cat
+    fetchImage(params,false)
   };
 
+  const clearSearch = ()=>{
+    setSearch("")
+    searchInputRef?.current?.clear()
+
+  }
   useEffect(() => {
     fetchImage();
   }, []);
@@ -49,8 +61,31 @@ const HomeScreen = () => {
      }
   };
 
+  const handleSearch = (text)=>{
+    setSearch(text)
+
+    if(text.length > 2)
+    {
+      page = 1
+      setImage([])
+      setActiveCategory(null)
+      fetchImage({page,q:text})
+    }
+
+    if(text=="")
+    {
+      page = 1
+      searchInputRef?.current?.clear()
+      setActiveCategory(null)
+      setImage([])
+      fetchImage({page})
+    }
+  }
+
+  const handleTextDebounce = useCallback(debounce(handleSearch,400),[])
   const { top } = useSafeAreaInsets();
   const paddingTop = top > 0 ? top + 10 : 30;
+
   return (
     <View style={[styles.container, { paddingTop }]}>
       <View style={styles.header}>
@@ -74,11 +109,13 @@ const HomeScreen = () => {
             placeholder="Tìm kiếm ảnh ..."
             style={styles.searchInput}
             ref={searchInputRef}
-            onChangeText={(value) => setSearch(value)}
+            onChangeText={handleTextDebounce}
           />
 
           {search && (
-            <Pressable style={styles.closeIcon}>
+            <Pressable 
+            onPress={()=>handleSearch("")}
+            style={styles.closeIcon}>
               <Ionicons
                 name="close"
                 size={24}
