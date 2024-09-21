@@ -12,12 +12,12 @@ const Categories = ({ activeCategory, handleChangeCategory }) => {
             contentContainerStyle={styles.flatlistContainer}
             showsHorizontalScrollIndicator={false}
             data={data.categories}
-            keyExtractor={item => item}
+            keyExtractor={item => item.en}
             renderItem={({ item, index }) => (
                 <CategoryItem
                     title={item}
                     index={index}
-                    isActive = {activeCategory==item}
+                    isActive = {activeCategory==item.en}
                     handleChangeCategory={handleChangeCategory}
                 />
             )}
@@ -31,10 +31,10 @@ const CategoryItem = ({ title,index,isActive,handleChangeCategory }) => {
     return (
         <Animated.View entering={FadeInRight.delay(index*200).duration(1000)}>
             <Pressable 
-            onPress={()=>handleChangeCategory(isActive?null:title)} 
+            onPress={()=>handleChangeCategory(isActive?null:title.en)} 
             style={[styles.category,{backgroundColor}]}
             >
-            <Text style={[styles.title,{TextColor}]}>{title}</Text>
+            <Text style={[styles.title,{TextColor}]}>{title.vi}</Text>
             </Pressable>
         </Animated.View>
     );

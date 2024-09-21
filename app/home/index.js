@@ -4,8 +4,12 @@ import { apiCall } from "../../api";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,Text,StyleSheet,
-  Pressable,ScrollView,TextInput,
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,75 +18,120 @@ import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 
 import Categories from "../../components/categories";
 import Images from "../../components/images";
-
+import FilterModals from "../../components/filtermodal";
 var page = 1;
 
 const HomeScreen = () => {
   const router = useRouter();
-  
+
   const [search, setSearch] = useState("");
   const searchInputRef = useRef(null);
   const [activeCategory, setActiveCategory] = useState(null);
-  const [images,setImage]=useState([])
+  const [images, setImage] = useState([]);
+  const [filters, setFilters] = useState(null);
+  const modalRef = useRef(null);
+  // Loại bỏ trường 'vi' khỏi từng bộ lọc
+  const getFilters = (filters) => {
+    if (filters == null) {
+      return null;
+    }
+    return Object.entries(filters).reduce(
+      (acc, [key, value]) => {
+        // Nếu value là đối tượng, chỉ giữ giá trị của trường 'en'
+        
+          acc[key] = value.en; // Chỉ giữ giá trị của trường 'en'
+        
+        return acc;
+      },
+      {}
+    );
+  };
 
   const handleChangeCategory = (cat) => {
+    const cleanedFilters = getFilters(filters)
     setActiveCategory(cat);
-    clearSearch()
-    setImage([])
+    clearSearch();
+    setImage([]);
     page = 1;
     let params = {
       page,
-    }
-    if(cat)params.category = cat
-    fetchImage(params,false)
+      ...cleanedFilters,
+    };
+    if (cat) params.category = cat;
+    fetchImage(params, false);
   };
 
-  const clearSearch = ()=>{
-    setSearch("")
-    searchInputRef?.current?.clear()
-
-  }
+  const clearSearch = () => {
+    setSearch("");
+    searchInputRef?.current?.clear();
+  };
   useEffect(() => {
     fetchImage();
   }, []);
 
-  const fetchImage = async (params = { page: 1 },append=false) => {
-     let res = await apiCall(params);
-     if(res.success && res?.data?.hits)
-     {  
-        if(append)
-        {
-           setImage([...images,...res.data.hits])
-        }
-        else
-        {
-            setImage([...res.data.hits])
-        }
-     }
+  const fetchImage = async (params = { page: 1 }, append = false) => {
+    let res = await apiCall(params);
+    if (res.success && res?.data?.hits) {
+      if (append) {
+        setImage([...images, ...res.data.hits]);
+      } else {
+        setImage([...res.data.hits]);
+      }
+    }
   };
 
-  const handleSearch = (text)=>{
-    setSearch(text)
+  const openFilterModal = () => {
+    modalRef?.current?.present();
+  };
 
-    if(text.length > 2)
-    {
-      page = 1
-      setImage([])
-      setActiveCategory(null)
-      fetchImage({page,q:text})
+  const closeFilterModal = () => {
+    modalRef?.current?.close();
+  };
+
+  const applyFilter = () => {
+    const cleanedFilters = getFilters(filters)
+    console.log('apply filter ' + cleanedFilters)
+    if (filters) {
+      page = 1;
+      setImage([]);
+      let params = {
+        page,
+        ...cleanedFilters,
+      };
+      if (activeCategory) params.categories = activeCategory;
+      if (search) params.q = search;
+      fetchImage(params, false);
     }
 
-    if(text=="")
-    {
-      page = 1
-      searchInputRef?.current?.clear()
-      setActiveCategory(null)
-      setImage([])
-      fetchImage({page})
-    }
-  }
+    closeFilterModal();
+  };
 
-  const handleTextDebounce = useCallback(debounce(handleSearch,400),[])
+  const resetFilter = () => {
+    setFilters(null);
+  };
+
+  const handleSearch = (text) => {
+    const cleanedFilters = getFilters(filters)
+    setSearch(text);
+
+    if (text.length > 2) {
+      page = 1;
+      setImage([]);
+      setActiveCategory(null);
+      fetchImage({ page, q: text, ...cleanedFilters }, false);
+    }
+
+    if (text == "") {
+      page = 1;
+      searchInputRef?.current?.clear();
+      setActiveCategory(null);
+      setImage([]);
+      fetchImage({ page, ...cleanedFilters }, false);
+    }
+  };
+
+  console.log("filter", filters);
+  const handleTextDebounce = useCallback(debounce(handleSearch, 400), []);
   const { top } = useSafeAreaInsets();
   const paddingTop = top > 0 ? top + 10 : 30;
 
@@ -93,7 +142,7 @@ const HomeScreen = () => {
           <Text style={styles.title}>Noobs</Text>
         </Pressable>
 
-        <Pressable>
+        <Pressable onPress={openFilterModal}>
           <FontAwesome name="bars" size={22} color={theme.color.neutral(0.7)} />
         </Pressable>
       </View>
@@ -113,9 +162,10 @@ const HomeScreen = () => {
           />
 
           {search && (
-            <Pressable 
-            onPress={()=>handleSearch("")}
-            style={styles.closeIcon}>
+            <Pressable
+              onPress={() => handleSearch("")}
+              style={styles.closeIcon}
+            >
               <Ionicons
                 name="close"
                 size={24}
@@ -134,12 +184,18 @@ const HomeScreen = () => {
         </View>
 
         {/* view image */}
-        <View>
-            {images.length>0 && (
-                <Images images={images}/>
-            )}
-        </View>
+        <View>{images.length > 0 && <Images images={images} />}</View>
       </ScrollView>
+
+      {/* filter modal */}
+      <FilterModals
+        modalRef={modalRef}
+        filters={filters}
+        setFilters={setFilters}
+        onClose={closeFilterModal}
+        onApply={applyFilter}
+        onReset={resetFilter}
+      />
     </View>
   );
 };
