@@ -31,6 +31,8 @@ const HomeScreen = () => {
   const [images, setImage] = useState([]);
   const [filters, setFilters] = useState(null);
   const modalRef = useRef(null);
+  const scrollRef = useRef(null);
+  const [isEndReached, setIsEndReached] = useState(false);
   // Loại bỏ trường 'vi' khỏi từng bộ lọc
   const getFilters = (filters) => {
     if (filters == null) {
@@ -67,7 +69,7 @@ const HomeScreen = () => {
     fetchImage();
   }, []);
 
-  const fetchImage = async (params = { page: 1 }, append = false) => {
+  const fetchImage = async (params = { page: 1 }, append = true) => {
     let res = await apiCall(params);
     if (res.success && res?.data?.hits) {
       if (append) {
@@ -112,15 +114,15 @@ const HomeScreen = () => {
     };
     if (activeCategory) params.categories = activeCategory;
     if (search) params.q = search;
-    fetchImage(params, false);
+    fetchImage(params);
 
     closeFilterModal();
   };
 
-  const clearThisFilter=(key)=>{
-    delete filters[key]
-    applyFilter()
-  }
+  const clearThisFilter = (key) => {
+    delete filters[key];
+    applyFilter();
+  };
 
   const handleSearch = (text) => {
     const cleanedFilters = getFilters(filters);
@@ -142,6 +144,35 @@ const HomeScreen = () => {
     }
   };
 
+  const handleScroll = (event) => {
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
+    const scrollOffset = event.nativeEvent.contentOffset.y;
+    const bottomPositon = contentHeight - scrollViewHeight;
+    if (scrollOffset >= bottomPositon - 1) {
+      if (!isEndReached) {
+        // get new list img page
+        ++page;
+        const cleanedFilters = getFilters(filters);
+        let params = {
+          page,
+          ...cleanedFilters,
+        };
+        if (activeCategory) params.categories = activeCategory;
+        if (search) params.q = search;
+        fetchImage(params);
+      }
+    } else if (isEndReached) {
+      setIsEndReached(false);
+    }
+  };
+
+  const handleScrollUp = () => {
+    scrollRef?.current?.scrollTo({
+      y: 0,
+      animated: true,
+    });
+  };
   const handleTextDebounce = useCallback(debounce(handleSearch, 400), []);
   const { top } = useSafeAreaInsets();
   const paddingTop = top > 0 ? top + 10 : 30;
@@ -149,7 +180,7 @@ const HomeScreen = () => {
   return (
     <View style={[styles.container, { paddingTop }]}>
       <View style={styles.header}>
-        <Pressable>
+        <Pressable onPress={handleScrollUp}>
           <Text style={styles.title}>Noobs</Text>
         </Pressable>
 
@@ -158,7 +189,12 @@ const HomeScreen = () => {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={{ gap: 12 }}>
+      <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={5}
+        ref={scrollRef}
+        contentContainerStyle={{ gap: 12 }}
+      >
         {/* search bar */}
         <View style={styles.searchBar}>
           <View style={styles.searchIcon}>
@@ -194,43 +230,47 @@ const HomeScreen = () => {
           />
         </View>
 
-{/* filter */}
-{
-  filters && (
-    <View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-        {
-          Object.keys(filters).map((key,index)=>{
-            return(
-              <View key={key} style={styles.filterItems}>
-                {
-                  key==='colors'?(
-                    <View style={{
-                      height:20,
-                      width:30,
-                      borderRadius:7,
-                      backgroundColor:filters[key].en
-                    }}></View>
-                  )
-                :(
-                  <Text style={styles.filterItemText}>{filters[key].vi}</Text>
-                )}
-                <Pressable style={styles.filterCloseIcon} onPress={()=>clearThisFilter(key)}>
-                <Ionicons
-                name="close"
-                size={14}
-                color={theme.color.neutral(0.9)}
-              />
-                </Pressable>
-              </View>
-            )
-          })
-        }
-
-      </ScrollView>
-    </View>
-  )
-}
+        {/* filter */}
+        {filters && (
+          <View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filters}
+            >
+              {Object.keys(filters).map((key, index) => {
+                return (
+                  <View key={key} style={styles.filterItems}>
+                    {key === "colors" ? (
+                      <View
+                        style={{
+                          height: 20,
+                          width: 30,
+                          borderRadius: 7,
+                          backgroundColor: filters[key].en,
+                        }}
+                      ></View>
+                    ) : (
+                      <Text style={styles.filterItemText}>
+                        {filters[key].vi}
+                      </Text>
+                    )}
+                    <Pressable
+                      style={styles.filterCloseIcon}
+                      onPress={() => clearThisFilter(key)}
+                    >
+                      <Ionicons
+                        name="close"
+                        size={14}
+                        color={theme.color.neutral(0.9)}
+                      />
+                    </Pressable>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
         {/* view image */}
         <View>{images.length > 0 && <Images images={images} />}</View>
         {/* loading view */}
@@ -295,28 +335,28 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: theme.radius.sm,
   },
-  filters:{
-    paddingHorizontal:wd(4),
-    gap:10
+  filters: {
+    paddingHorizontal: wd(4),
+    gap: 10,
   },
-  filterItems:{
-    backgroundColor:theme.color.gray,
-    padding:3,
-    flexDirection:'row',
-    alignItems:'center',
-    borderRadius:theme.radius.xs,
-    padding:8,
-    gap:10,
-    paddingHorizontal:10
+  filterItems: {
+    backgroundColor: theme.color.gray,
+    padding: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: theme.radius.xs,
+    padding: 8,
+    gap: 10,
+    paddingHorizontal: 10,
   },
-  filterItemText:{
-    fontSize:hp(1,9)
+  filterItemText: {
+    fontSize: hp(1, 9),
   },
-  closeIcon:{
-    backgroundColor:theme.color.neutral(0.2),
-    padding:4,
-    borderRadius:7
-  }
+  closeIcon: {
+    backgroundColor: theme.color.neutral(0.2),
+    padding: 4,
+    borderRadius: 7,
+  },
 });
 
 export default HomeScreen;
