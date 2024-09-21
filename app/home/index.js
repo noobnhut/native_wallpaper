@@ -10,6 +10,7 @@ import {
   Pressable,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -35,20 +36,17 @@ const HomeScreen = () => {
     if (filters == null) {
       return null;
     }
-    return Object.entries(filters).reduce(
-      (acc, [key, value]) => {
-        // Nếu value là đối tượng, chỉ giữ giá trị của trường 'en'
-        
-          acc[key] = value.en; // Chỉ giữ giá trị của trường 'en'
-        
-        return acc;
-      },
-      {}
-    );
+    return Object.entries(filters).reduce((acc, [key, value]) => {
+      // Nếu value là đối tượng, chỉ giữ giá trị của trường 'en'
+
+      acc[key] = value.en; // Chỉ giữ giá trị của trường 'en'
+
+      return acc;
+    }, {});
   };
 
   const handleChangeCategory = (cat) => {
-    const cleanedFilters = getFilters(filters)
+    const cleanedFilters = getFilters(filters);
     setActiveCategory(cat);
     clearSearch();
     setImage([]);
@@ -89,8 +87,7 @@ const HomeScreen = () => {
   };
 
   const applyFilter = () => {
-    const cleanedFilters = getFilters(filters)
-    console.log('apply filter ' + cleanedFilters)
+    const cleanedFilters = getFilters(filters);
     if (filters) {
       page = 1;
       setImage([]);
@@ -108,10 +105,25 @@ const HomeScreen = () => {
 
   const resetFilter = () => {
     setFilters(null);
+    page = 1;
+    setImage([]);
+    let params = {
+      page,
+    };
+    if (activeCategory) params.categories = activeCategory;
+    if (search) params.q = search;
+    fetchImage(params, false);
+
+    closeFilterModal();
   };
 
+  const clearThisFilter=(key)=>{
+    delete filters[key]
+    applyFilter()
+  }
+
   const handleSearch = (text) => {
-    const cleanedFilters = getFilters(filters)
+    const cleanedFilters = getFilters(filters);
     setSearch(text);
 
     if (text.length > 2) {
@@ -130,7 +142,6 @@ const HomeScreen = () => {
     }
   };
 
-  console.log("filter", filters);
   const handleTextDebounce = useCallback(debounce(handleSearch, 400), []);
   const { top } = useSafeAreaInsets();
   const paddingTop = top > 0 ? top + 10 : 30;
@@ -183,8 +194,51 @@ const HomeScreen = () => {
           />
         </View>
 
+{/* filter */}
+{
+  filters && (
+    <View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+        {
+          Object.keys(filters).map((key,index)=>{
+            return(
+              <View key={key} style={styles.filterItems}>
+                {
+                  key==='colors'?(
+                    <View style={{
+                      height:20,
+                      width:30,
+                      borderRadius:7,
+                      backgroundColor:filters[key].en
+                    }}></View>
+                  )
+                :(
+                  <Text style={styles.filterItemText}>{filters[key].vi}</Text>
+                )}
+                <Pressable style={styles.filterCloseIcon} onPress={()=>clearThisFilter(key)}>
+                <Ionicons
+                name="close"
+                size={14}
+                color={theme.color.neutral(0.9)}
+              />
+                </Pressable>
+              </View>
+            )
+          })
+        }
+
+      </ScrollView>
+    </View>
+  )
+}
         {/* view image */}
         <View>{images.length > 0 && <Images images={images} />}</View>
+        {/* loading view */}
+        <View
+          style={{ marginBottom: 70, marginTop: images.length > 0 ? 10 : 70 }}
+        >
+          <ActivityIndicator size="larger" />
+        </View>
       </ScrollView>
 
       {/* filter modal */}
@@ -241,5 +295,28 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: theme.radius.sm,
   },
+  filters:{
+    paddingHorizontal:wd(4),
+    gap:10
+  },
+  filterItems:{
+    backgroundColor:theme.color.gray,
+    padding:3,
+    flexDirection:'row',
+    alignItems:'center',
+    borderRadius:theme.radius.xs,
+    padding:8,
+    gap:10,
+    paddingHorizontal:10
+  },
+  filterItemText:{
+    fontSize:hp(1,9)
+  },
+  closeIcon:{
+    backgroundColor:theme.color.neutral(0.2),
+    padding:4,
+    borderRadius:7
+  }
 });
+
 export default HomeScreen;
