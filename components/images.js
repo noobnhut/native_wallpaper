@@ -18,7 +18,6 @@ const Images = ({images,router }) => {
             estimatedItemSize={200}
             contentContainerStyle={styles.listContainerStyle}
             initiaNumToRender={1000}
-
             />
         </View>
     );

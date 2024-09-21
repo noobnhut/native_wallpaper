@@ -33,7 +33,7 @@ const FilterModals = ({
     >
       <BottomSheetView style={styles.contentContainer}>
         <View style={styles.content}>
-          <Text style={styles.filterText}>Filters</Text>
+          <Text style={styles.filterText}>Bộ lọc</Text>
           {Object.keys(sections).map((sectionName, index) => {
             let sectionView = sections[sectionName];
             let sectionData = data.filters[sectionName];
