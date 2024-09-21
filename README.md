@@ -16,3 +16,4 @@ https://docs.swmansion.com/react-native-reanimated
 https://docs.expo.dev/versions/latest/sdk/linear-gradient/
 https://icons.expo.fyi/Index
 https://shopify.github.io/flash-list/
+https://www.npmjs.com/package/@gorhom/bottom-sheet
