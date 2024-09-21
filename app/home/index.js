@@ -272,7 +272,7 @@ const HomeScreen = () => {
           </View>
         )}
         {/* view image */}
-        <View>{images.length > 0 && <Images images={images} />}</View>
+        <View>{images.length > 0 && <Images images={images} router={router} />}</View>
         {/* loading view */}
         <View
           style={{ marginBottom: 70, marginTop: images.length > 0 ? 10 : 70 }}

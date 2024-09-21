@@ -6,7 +6,7 @@ import { theme } from "../constants/theme";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import { MasonryFlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
-const ImageCard = ({ item, index, columns }) => {
+const ImageCard = ({ item, index, columns ,router}) => {
 
   const getImageHight = () => {
     let { imageHight: height, imageWitdth: width } = item;
@@ -17,7 +17,9 @@ const ImageCard = ({ item, index, columns }) => {
     return (index+1)%columns ===0
   }
   return (
-    <Pressable style={[styles.imageWrapper,!isLastInRow() && styles.spacing]}>
+    <Pressable 
+    onPress={()=>{router.push({pathname:'home/image',params:{...item}})}}
+    style={[styles.imageWrapper,!isLastInRow() && styles.spacing]}>
       <Image
         style={[styles.image, getImageHight()]}
         source={{ uri: item?.webformatURL }}

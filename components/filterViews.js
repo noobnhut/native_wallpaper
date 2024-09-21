@@ -111,7 +111,9 @@ const styles = StyleSheet.create({
     height:30,
     width:40,
     borderRadius:theme.radius.sm,
-    borderCurve:'continuous'
+    borderCurve:'continuous',
+    borderWidth:1,
+    borderColor:theme.color.gray
   }
 });
 export default SectionView;

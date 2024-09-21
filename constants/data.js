@@ -44,7 +44,6 @@ export const data = {
         { en: "green", vi: "Xanh lá" },
         { en: "turquoise", vi: "Xanh ngọc" },
         { en: "blue", vi: "Xanh dương" },
-        { en: "lilac", vi: "Hoa cà" },
         { en: "pink", vi: "Hồng" },
         { en: "white", vi: "Trắng" },
         { en: "gray", vi: "Xám" },

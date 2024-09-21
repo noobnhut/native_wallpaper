@@ -2,7 +2,7 @@ export const theme ={
     color:{
         white:'#fff',
         black:'#000',
-        gray:'#fff',
+        gray:'gray',
         neutral:(opacity)=>`rgba(10,10,10,${opacity})`
     },
     fontWeights:{

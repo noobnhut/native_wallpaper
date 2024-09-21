@@ -7,14 +7,14 @@ import Animated, { FadeInRight } from 'react-native-reanimated';
 import { MasonryFlashList } from '@shopify/flash-list';
 import ImageCard from './imagecard';
 
-const Images = ({images }) => {
+const Images = ({images,router }) => {
     const columns = getColumnCount()
     return (
         <View style={styles.container}>
            <MasonryFlashList
             data={images}
             numColumns={columns}
-            renderItem={({item,index})=><ImageCard item={item} index={index} columns={columns}/>}
+            renderItem={({item,index})=><ImageCard  router={router} item={item} index={index} columns={columns}/>}
             estimatedItemSize={200}
             contentContainerStyle={styles.listContainerStyle}
             initiaNumToRender={1000}
