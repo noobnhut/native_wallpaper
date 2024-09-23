@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     flex:1,
     flexDirection:'row',
     alignItems:'center',
-    gap:10
+    gap:20
   },
   applyButton:{
     flex:1,
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     borderColor:theme.color.gray
   },
   buttonText:{
-    fontSize:hp(2.2)
+    fontSize:hp(3)
   }
 });
 export default FilterModals;

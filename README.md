@@ -11,6 +11,14 @@
    ```bash
     npx expo start
    ```
+3. Deploy expo project
+   ```npm install --global eas-cli 
+      eas login
+      eas init --id "your_id_project in expo"
+      eas build --platform android
+      eas build -p android --profile preview
+   ```
+
 ## Documents
 https://docs.swmansion.com/react-native-reanimated
 https://docs.expo.dev/versions/latest/sdk/linear-gradient/

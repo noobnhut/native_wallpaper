@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "authpass",
-    "slug": "authpass",
+    "name": "Noobs wallpaper",
+    "slug": "noobs-wallpaper",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -20,7 +20,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.authpass"
+      "package": "com.anonymous.noobswallpaper"
     },
     "web": {
       "bundler": "metro",
@@ -32,6 +32,12 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "177faaa1-cd37-465c-8437-5bb91a1eb0f1"
+      }
+    },
+    "owner": "noobnhut"
   }
 }
